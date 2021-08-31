@@ -1,3 +1,5 @@
+//O APP QUE RECEBE O ARRAY PRONTO DO DROPBOX E FAZ A APLICAÇÃO DO AWS
+
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -14,7 +16,6 @@ app.use(express.static(__dirname + '/public'));
 
 decrypt((ids) => { 
 	idList = ids;
-	console.log(JSON.stringify(ids, 2, 2));
 });
 
 
@@ -26,10 +27,9 @@ app.get("/", (req, res) => {
 
 app.get("/updatelist", (req, res) => {
 	res.sendStatus(200);
-	console.log("Received updatelist request");
+	console.log("receiving update status");
 	decrypt((ids) => { 
 		idList = ids;
-		console.log(JSON.stringify(ids, 2, 2));
 	});
 	
 });
