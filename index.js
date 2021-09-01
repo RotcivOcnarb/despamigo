@@ -18,11 +18,38 @@ decrypt((ids) => {
 	idList = ids;
 });
 
+function findFromId(id){
+	for(var i = 0; i < idList.length; i++){
+		if(idList[i].id == id){
+			return i;
+		}
+	}
+	return -1;
+}
+
 
 app.get("/", (req, res) => {
-	res.render("home", {
-		"ids": ids,
-	});
+	res.render("home");
+});
+
+app.get("/quemtirei", (req, res) => {
+	if(req.query["id"]){
+		
+		var id = req.query["id"];
+		var index = findFromId(id);
+		if(index != -1){
+			res.send({
+				"me": idList[index].name,
+				"other": idList[(index+1) % idList.length].name
+			});
+		}
+		else{
+			res.send("id supplied was not found");
+		}
+	}
+	else{
+		res.send("no id supplied");
+	}
 });
 
 app.get("/updatelist", (req, res) => {
