@@ -28,9 +28,9 @@ function findFromId(id){
 }
 
 
-app.get("/", (req, res) => {
-	res.render("home");
-});
+// app.get("/", (req, res) => {
+	// res.render("home");
+// });
 
 app.get("/quemtirei", (req, res) => {
 	if(req.query["id"]){
