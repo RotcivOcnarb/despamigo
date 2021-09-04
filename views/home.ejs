@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Despamigo Secreto!</title>
+	<link rel="stylesheet" href="/css/style.css"/>
+	<!-- <script src="/js/phaser.min.js"></script> -->
+	<script type="module" src="/dist/main.js"></script>
+	
+  </head>
+  <body style="margin: 0; height: 100%; overflow: hidden">
+	<script>
+	
+		function quemTirei(id, callback){
+			httpGetAsync("http://" + location.host + "/quemtirei?id=" + id, (response) => {
+				callback(response);
+			});
+		}
+	
+		function httpGetAsync(theUrl, callback)
+		{
+			var xmlHttp = new XMLHttpRequest();
+			xmlHttp.onreadystatechange = function() { 
+				if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+					callback(xmlHttp.responseText);
+			}
+			xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+			xmlHttp.send(null);
+		}
+			
+	</script>
+
+  </body>
+</html>

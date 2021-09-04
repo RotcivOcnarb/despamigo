@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+      "target": "ES6",
+      "moduleResolution": "node",
+      "outDir": "public/js/",
+      "allowSyntheticDefaultImports": true
+    },
+    "include": ["public/ts/**/*.ts"]
+  }
+  
