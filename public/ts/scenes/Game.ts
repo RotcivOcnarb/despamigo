@@ -236,7 +236,7 @@ export default class AmogusScene extends Phaser.Scene {
   addFont(name:string, path: string, format: string){
     var element = document.createElement('style');
     document.head.appendChild(element);
-    var sheet = element.sheet;
+    var sheet = <CSSStyleSheet>element.sheet;
     var styles = '@font-face { font-family: "'+name+'"; src: url("'+path+'") format("'+format+'"); }\n';
     sheet.insertRule(styles, 0);
   }
