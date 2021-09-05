@@ -5,5 +5,13 @@ export default {
 	width: window.innerWidth,
 	height: window.innerHeight,
 	pixelArt: true,
-  parent: 'game',
+	parent: 'game',
+	physics: {
+		default: "arcade",
+		arcade: {
+		debug: false,
+		debugShowVelocity: false,
+		gravity: { y: 0 }
+		}
+	},
 };

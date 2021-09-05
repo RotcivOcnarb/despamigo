@@ -18,6 +18,10 @@ export default class Amogus {
     game: AmogusScene;
     origin: Vector2;
     amogus_position: Vector2;
+    bubble: Phaser.GameObjects.Image;
+    bubble_text: Phaser.GameObjects.Text;
+    text_start: number = 0;
+    bubble_string: string = "Faaala meme";
 
 
     constructor(scene: AmogusScene) {
@@ -25,15 +29,15 @@ export default class Amogus {
 
 
 
-        this.origin = {
-            x: this.game.screen_size.x/2,
-            y: this.game.screen_size.y* 0.25
-        }
+        this.origin = new Vector2(
+            this.game.screen_size.x/2,
+            this.game.screen_size.y* 0.25
+        )
 
-        this.amogus_position = {
-            x: (this.game.screen_size.x as number)/2,
-            y: (this.game.screen_size.y as number)/2
-        }
+        this.amogus_position = new Vector2(
+            (this.game.screen_size.x as number)/2,
+            (this.game.screen_size.y as number)/2
+        )
     }
 
     preload() {
@@ -43,6 +47,20 @@ export default class Amogus {
         this.game.load.image('amogus_backpack', '/assets/amogus/backpack.png');
         this.game.load.image('amogus_foot', '/assets/amogus/foot.png');
         this.game.load.image('amogus_visor', '/assets/amogus/visor.png');
+
+        this.game.load.image('speech_bubble', '/assets/text_bubble.png')
+    }
+
+    fontload(){
+        this.bubble_text = this.game.add.text(1140, 120, "", {
+            fontFamily: 'Determination',
+            fontSize: "30px",
+            color: '#000000',
+            wordWrap: { 
+              width: 350
+            }
+          });
+          this.bubble_text.setVisible(false);
     }
 
     create() {
@@ -54,6 +72,27 @@ export default class Amogus {
             this.body_images[part_name].setScale(3);
             this.body_position[part_name] = new Vector2(0, 0);
         }
+
+        this.bubble = this.game.add.image(1300, 200, 'speech_bubble');
+        this.bubble.setScale(2);
+        this.bubble.setVisible(false);
+
+    }
+
+    openTextBubble(message: string, timeout: number){
+        this.bubble_string = message;
+        this.text_start = this.game.gameTime;
+        this.bubble.setVisible(true);
+        if(this.bubble_text)
+            this.bubble_text.setVisible(true);
+
+        setTimeout(() => {
+            if(this.bubble_text)
+                this.bubble_text.setVisible(false);
+
+            this.bubble.setVisible(false);
+
+        }, timeout * 1000);
     }
 
 /*
@@ -109,6 +148,12 @@ export default class Amogus {
             this.amogus_position.x,
             this.amogus_position.y
             );
+
+        if(this.bubble_text){	
+            var cts = Math.floor((this.game.gameTime - this.text_start) * 20);
+            cts = Math.min(Math.max(0, cts), this.bubble_string.length);
+            this.bubble_text.setText(this.bubble_string.substring(0, cts));
+        }
     }
     
 }
