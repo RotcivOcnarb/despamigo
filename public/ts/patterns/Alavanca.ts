@@ -37,9 +37,10 @@ export default class Alavanca extends BulletPattern {
         this.alavanca = this.game.add.image(this.game.screen_size.x*0.7, this.game.screen_size.y * 0.6, 'alavanca');
         this.alavanca.setScale(3);
         this.alavanca.setAlpha(0);
+    }
 
+    fontload() {
         
-
     }
 
     reset(){
@@ -65,7 +66,6 @@ export default class Alavanca extends BulletPattern {
                 this.randomRange(this.game.screen_size.x * 0.4, this.game.screen_size.x * 0.6),
                 this.randomRange(this.game.screen_size.y * 0.1, this.game.screen_size.y * 0.3)
             );
-
 
             var folha = this.game.physics.add.image(position.x, position.y, f[Math.floor(Math.random() * f.length)]);
 

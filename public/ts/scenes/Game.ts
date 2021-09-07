@@ -4,6 +4,9 @@ import Vector2 from '../utils/Vector2';
 import * as WebFont from "webfontloader";
 import Alavanca from '../patterns/Alavanca';
 import BulletPattern from '../patterns/BulletPattern';
+import Asteroids from '../patterns/Asteroids';
+import AimCross from '../patterns/AimCross';
+import Upload from '../patterns/Upload';
 
 enum MenuType{
   Unselected,
@@ -17,6 +20,7 @@ enum MenuType{
 
 export default class AmogusScene extends Phaser.Scene {
 
+  
   gameTime: number;
   amogus: Amogus;
   screen_size: Vector2;
@@ -89,6 +93,7 @@ export default class AmogusScene extends Phaser.Scene {
     "mercy"
   ];
   heart: Phaser.GameObjects.Image;
+  heartMoving: boolean;
   buttonselected: number = 0;
 
   //Horizontal Group;
@@ -104,9 +109,11 @@ export default class AmogusScene extends Phaser.Scene {
   selectingOption: boolean = true;
 
   textAnimationStart: number = 0;
+  gameFinished: boolean = false;
+
 
   options = [
-    MenuType.Unselected,
+    MenuType.Fight,
     MenuType.Act,
     MenuType.Item,
     MenuType.Mercy
@@ -148,6 +155,35 @@ export default class AmogusScene extends Phaser.Scene {
   bulletPatterns = [];
   currentPattern: BulletPattern;
   bullets = [];
+
+  //Attack
+  attacK_bar: Phaser.GameObjects.Image;
+  attack_timer: number;
+  needle: Phaser.GameObjects.Image;
+  needle_sprites = [
+    "needle_default",
+    "needle_inverted"
+  ]
+  attack_executed: boolean;
+  needle_position: number;
+  dmg_animation: Phaser.GameObjects.Image;
+  dmg_start_time: number = 0;
+  can_spare: boolean = false;
+
+  //Audio
+
+  music: Phaser.Sound.BaseSound
+  movemenu: Phaser.Sound.BaseSound
+  select: Phaser.Sound.BaseSound
+  target: Phaser.Sound.BaseSound
+  squeak: Phaser.Sound.BaseSound
+  voice: Phaser.Sound.BaseSound
+  damage: Phaser.Sound.BaseSound
+  heal: Phaser.Sound.BaseSound
+  punchstrong: Phaser.Sound.BaseSound
+  punchweak: Phaser.Sound.BaseSound
+
+  textIndex: number;
 
   constructor() {
     super('GameScene');
@@ -203,7 +239,11 @@ export default class AmogusScene extends Phaser.Scene {
 
     this.amogus = new Amogus(this);
 
+    this.bulletPatterns.push(new Upload(this));
+    this.bulletPatterns.push(new AimCross(this));
+    this.bulletPatterns.push(new Asteroids(this));
     this.bulletPatterns.push(new Alavanca(this));
+
 
     this.textvalue = this.neutralTexts[Math.floor(Math.random() * this.neutralTexts.length)];
   }
@@ -222,6 +262,37 @@ export default class AmogusScene extends Phaser.Scene {
     for(var i = 0; i < this.bulletPatterns.length; i ++){
       this.bulletPatterns[i].preload();
     }
+
+    for(var i = 0; i < 6; i ++){
+      this.load.image('atck_' + i, '/assets/dmg/'+i+'.png');
+    }
+    this.load.image("attack_bar", "/assets/attack_bar.png");
+    this.load.image("needle_default", '/assets/dmg/needle_default.png');
+    this.load.image("needle_inverted", '/assets/dmg/needle_inverted.png');
+
+    this.load.image("spare_particle", "/assets/spare_particle.png");
+
+    this.load.audio('theme', [
+      'assets/audio/eurobeat.ogg',
+      'assets/audio/eurobeat.mp3'
+    ]);
+
+    this.loadAudioOggWav("movemenu", "/assets/audio");
+    this.loadAudioOggWav("select", "/assets/audio");
+    this.loadAudioOggWav("target", "/assets/audio");
+    this.loadAudioOggWav("squeak", "/assets/audio");
+    this.loadAudioOggWav("voice", "/assets/audio");
+    this.loadAudioOggWav("damage", "/assets/audio");
+    this.loadAudioOggWav("heal", "/assets/audio");
+    this.loadAudioOggWav("punchstrong", "/assets/audio");
+    this.loadAudioOggWav("punchweak", "/assets/audio");
+  }
+
+  loadAudioOggWav(name, path){
+    this.load.audio(name, [
+      //path + "/"+name+".ogg",
+      path + "/"+name+".wav",
+    ])
   }
 
   loadImage(game, id, path){
@@ -231,6 +302,8 @@ export default class AmogusScene extends Phaser.Scene {
   init(){
     this.addFont("Determination", "assets/fonts/Determination.ttf", "truetype");
     this.addFont("Crypt", "assets/fonts/Crypt.ttf", "truetype");
+    this.addFont("Attack", "assets/fonts/Attack.ttf", "truetype");
+    this.addFont("Attack_Reverse", "assets/fonts/Attack_Reverse.ttf", "truetype");
   }
 
   addFont(name:string, path: string, format: string){
@@ -259,7 +332,7 @@ export default class AmogusScene extends Phaser.Scene {
 
     WebFont.load({
       custom: {
-          families: ['Determination', 'Crypt']
+          families: ['Determination', 'Crypt', 'Attack', 'Attack_Reverse']
       },
       active: function ()
       {
@@ -320,6 +393,9 @@ export default class AmogusScene extends Phaser.Scene {
         }
 
         self.amogus.fontload();
+        for(var i = 0; i < self.bulletPatterns.length; i ++){
+          self.bulletPatterns[i].fontload();
+        }
 
       }
     });
@@ -347,8 +423,67 @@ export default class AmogusScene extends Phaser.Scene {
       this.bulletPatterns[i].create();
     }
 
+    this.attacK_bar = this.add.image(this.textRect.x + this.textRect.width/2, this.textRect.y + this.textRect.height/2, "attack_bar");
+    this.attacK_bar.setScale(2);
+    this.attacK_bar.setVisible(false);
 
+    this.needle = this.add.image(this.menuRect.x + 20, this.menuRect.y + this.menuRect.height/2, "needle_default");
+    this.needle.setScale(1.8);
 
+    this.dmg_animation = this.add.image(this.screen_size.x/2, this.screen_size.y * 0.2, "atck_0");
+    this.dmg_animation.setScale(3);
+
+    this.createAudios();
+
+  }
+
+  createAudios(){
+    this.music = this.sound.add('theme', {
+      loop: true
+    });
+    this.music.play();
+
+    this.movemenu = this.sound.add("movemenu");
+    this.select = this.sound.add("select");
+    this.target = this.sound.add("target");
+    this.squeak = this.sound.add("squeak");
+    this.voice = this.sound.add("voice");
+    this.damage = this.sound.add("damage");
+    this.heal = this.sound.add("heal");
+    this.punchstrong = this.sound.add("punchstrong");
+    this.punchweak = this.sound.add("punchweak");
+  }
+  
+  spawnParticle(){
+    var sparePart = this.add.particles("spare_particle");
+    sparePart.createEmitter({
+      x: this.amogus.amogus_position.x /2,
+      y: (this.amogus.amogus_position.y) / 2,
+      lifespan: {min: 500, max: 1000},
+      speed: {min: 200, max: 500},
+      scale: { start: 1, end: 0 },
+      frequency: 10000,
+      quantity: 10,
+      alpha: {start: 1, end: 0},
+    });
+
+    sparePart.addGravityWell({
+      active: true,
+      x: 0,
+      y: 0,
+      power: 0,
+      epsilon: 0,
+      update: (p) => {
+        p.velocityX *= 0.95;
+        p.velocityY *= 0.95;
+      }
+    });
+
+    sparePart.setScale(2);
+
+    setTimeout(() => {
+      sparePart.destroy();
+    }, 2000);
   }
 
   overlapPointPixelPerfect(point: Vector2, image: Phaser.GameObjects.Image){
@@ -454,12 +589,20 @@ export default class AmogusScene extends Phaser.Scene {
         this.buttons[nm].setTexture(nm + "_idle");
       }
     }
+    this.attacK_bar.setVisible(false);
+    this.needle.setVisible(false);
+    this.dmg_animation.setVisible(false);
 
+    if(this.textOptions[0])
+    (this.textOptions[0] as Phaser.GameObjects.Text).setColor("#ffffff");
 
     switch(this.menuType){
       case MenuType.Unselected:
         this.inputUnselected();
         break;
+      case MenuType.Fight:
+        this.inputAttack();
+          break;
       case MenuType.Act:
         this.inputAct();
         break;
@@ -486,6 +629,13 @@ export default class AmogusScene extends Phaser.Scene {
       if(cts > 0)
         this.boxtext.setText("* " + this.textvalue.substring(0, cts));
       else this.boxtext.setText("");
+
+      if(this.textIndex != cts && this.boxtext.visible){
+        if(this.textvalue.substring(cts-1, cts) != " ")
+        this.voice.play();
+      }
+
+      this.textIndex = cts;
     }
 
     var heartAlpha = 1;
@@ -497,15 +647,23 @@ export default class AmogusScene extends Phaser.Scene {
     this.heart.setAlpha(heartAlpha);
 
     this.calculateHeartPosition(() => {
-      if(this.invulnerable < 0){
-        this.hp -= 5;
-        this.invulnerable = 1;
-        this.cameraPosition.x = Math.random() * 80 - 40;
-        this.cameraPosition.y = Math.random() * 80 - 40;
-      }
+      this.damagePlayer();
     });
+  }
 
-
+  damagePlayer(){
+    if(this.invulnerable < 0){
+      this.hp -= 5;
+      this.invulnerable = 1;
+      this.cameraPosition.x = Math.random() * 80 - 40;
+      this.cameraPosition.y = Math.random() * 80 - 40;
+      this.damage.play();
+      if(this.hp <= 0){
+        this.hp = 0;
+        this.scene.switch("GameOver");
+        this.music.stop();
+      }
+    }
   }
 
   updateInput(){
@@ -580,20 +738,31 @@ export default class AmogusScene extends Phaser.Scene {
 
       //Inputs
       this.onPressLeft = () => {
-        if(this.buttonselected > 0) this.buttonselected--;
+        if(this.gameFinished) return;
+        if(this.buttonselected > 0){ 
+          this.buttonselected--;
+          this.squeak.play();
+        }
       }
 
       this.onPressRight  = () => {
-        if(this.buttonselected < 3) this.buttonselected++;
+        if(this.gameFinished) return;
+        if(this.buttonselected < 3){ 
+          this.buttonselected++;
+          this.squeak.play();
+        }
       }
 
       this.onPressUp = () => {};
       this.onPressDown = () => {};
 
       this.onPressSelect = () => {
+        if(this.gameFinished) return;
         this.menuType = this.options[this.buttonselected];
         this.setInputSelection(this.stringOptions);
         this.selectedOption = 0;
+        this.attack_timer = this.gameTime;
+        this.select.play();
       }
 
       this.onPressBack = () => {}
@@ -618,16 +787,28 @@ export default class AmogusScene extends Phaser.Scene {
     }
 
     this.onPressLeft = () => {
-      if(this.stringOptions[this.selectedOption - 2]) this.selectedOption -= 2;
+      if(this.stringOptions[this.selectedOption - 2]){
+        this.selectedOption -= 2;
+        this.target.play();
+      }
     }
     this.onPressRight  = () => {
-      if(this.stringOptions[this.selectedOption + 2]) this.selectedOption += 2;
+      if(this.stringOptions[this.selectedOption + 2]){
+       this.selectedOption += 2;
+       this.target.play();
+      }
     }
     this.onPressUp = () => {
-      if(this.stringOptions[this.selectedOption - 1]) this.selectedOption -= 1;
+      if(this.stringOptions[this.selectedOption - 1]){
+       this.selectedOption -= 1;
+       this.target.play();
+      }
     };
     this.onPressDown = () => {
-      if(this.stringOptions[this.selectedOption + 1]) this.selectedOption += 1;
+      if(this.stringOptions[this.selectedOption + 1]) {
+        this.target.play();
+        this.selectedOption += 1;
+      }
     };
 
     var x = Math.floor(this.selectedOption / 2);
@@ -641,6 +822,7 @@ export default class AmogusScene extends Phaser.Scene {
     this.inputSelected();
 
     this.onPressSelect = () => {
+      this.select.play();
       if(!this.actTargetSelected){
         this.actTargetSelected = true;
         this.selectedOption = 0;
@@ -679,6 +861,7 @@ export default class AmogusScene extends Phaser.Scene {
           else{
             this.enterBattle();
             this.amogus.openTextBubble("OK!\n Your info is...", 4);
+            this.can_spare = true;
           }
             break;
         }
@@ -725,11 +908,13 @@ export default class AmogusScene extends Phaser.Scene {
           msg = "You recovered 10 HP";
           this.hp += 10;
           this.hp = Math.min(this.hp, 20);
+          this.heal.play();
           break;
         case 1: //Steamed Hams
           msg = "An unforgettable luncheon!\n       You recovered 15 HP";
           this.hp += 15;
           this.hp = Math.min(this.hp, 20);
+          this.heal.play();
           break;
         case 2: //Cigarette
           msg = "You have cancer now";
@@ -738,6 +923,7 @@ export default class AmogusScene extends Phaser.Scene {
           msg = "nice";
           this.hp += 1;
           this.hp = Math.min(this.hp, 20);
+          this.heal.play();
           break;
       }
       this.setPreBattle(msg);
@@ -753,13 +939,25 @@ export default class AmogusScene extends Phaser.Scene {
     this.inputSelected();
     this.setInputSelection(this.mercyOptions);
 
+    if(this.can_spare)
+      (this.textOptions[0] as Phaser.GameObjects.Text).setColor("#ffff00");
+
     this.onPressSelect = () => {
       if(!this.actTargetSelected){
         this.actTargetSelected = true;
         this.selectedOption = 0;
       }
       else{
-        console.log("Escolheu um Mercy");
+        if(this.can_spare){
+          this.amogus.setSpared();
+          this.spawnParticle();
+          this.exitBattle("You have spared AMOGUS");
+          this.gameFinished = true;
+        }
+        else{
+          this.enterBattle();
+          this.amogus.openTextBubble("This isn't over!!", 4);
+        }
       }
     }
 
@@ -783,7 +981,6 @@ export default class AmogusScene extends Phaser.Scene {
     }
   }
 
-
   enterBattle(){
     this.setTargetRect(this.battleRect);
 
@@ -800,7 +997,7 @@ export default class AmogusScene extends Phaser.Scene {
       this.amogus.openTextBubble(this.prebattlebubblemessage, 4);
   }
 
-  backToMenu(){
+  backToMenu(overrideText?: string){
     this.menuType = MenuType.Unselected;
     this.textAnimationStart = this.gameTime;
     this.heart.setScale(3 * 1.2);
@@ -808,18 +1005,19 @@ export default class AmogusScene extends Phaser.Scene {
     if(this.amogus_trust){
       var rnd = Math.floor(Math.random() * this.trustTexts.length);
       this.textvalue = this.trustTexts[rnd];
-      console.log("Trust rnd = " + rnd);
     }
     else{
       var rnd = Math.floor(Math.random() * this.neutralTexts.length);
       this.textvalue = this.neutralTexts[rnd];
-      console.log("Neutral rnd = " + rnd);
+    }
 
+    if(overrideText){
+      this.textvalue = overrideText;
     }
   }
 
-  exitBattle(){
-    this.backToMenu();
+  exitBattle(overrideText?: string){
+    this.backToMenu(overrideText);
     this.textAnimationStart = this.gameTime + .5;
     this.menuType = MenuType.Unselected;
   }
@@ -833,33 +1031,47 @@ export default class AmogusScene extends Phaser.Scene {
     this.onPressSelect = () => {}
     this.onPressBack = () => {}
 
+    var md = false;
     if(this.keyDown.isDown){
       this.heartPosition.y += dt * 0.5;
+      md = true;
       if(this.heartPosition.y > this.textRect.y + this.textRect.height - 20){
         this.heartPosition.y = this.textRect.y + this.textRect.height - 20;
+        md = false;
       }
     }
 
+    var mu = false;
     if(this.keyUp.isDown){
       this.heartPosition.y -= dt * 0.5;
+      mu = true;
       if(this.heartPosition.y < this.textRect.y + 20){
         this.heartPosition.y = this.textRect.y + 20;
+        mu = false;
       }
     }
 
+    var mr = false;
     if(this.keyRight.isDown){
       this.heartPosition.x += dt * 0.5;
+      mr = true;
       if(this.heartPosition.x > this.textRect.x + this.textRect.width - 20){
         this.heartPosition.x = this.textRect.x + this.textRect.width - 20;
+        mr = false;
       }
     }
 
+    var ml = false;
     if(this.keyLeft.isDown){
       this.heartPosition.x -= dt * 0.5;
+      ml = true;
       if(this.heartPosition.x < this.textRect.x + 20){
         this.heartPosition.x = this.textRect.x + 20;
+        ml = false;
       }
     }
+
+    this.heartMoving = md || mu || ml || mr;
 
     if(this.boxtext)
       this.boxtext.setVisible(false);
@@ -894,6 +1106,95 @@ export default class AmogusScene extends Phaser.Scene {
     }
 
     this.onPressBack = () =>{}
+  }
+
+  inputAttack(){
+
+    this.onPressUp = () => {}
+    this.onPressDown = () => {}
+    this.onPressLeft = () => {}
+    this.onPressRight = () => {}
+    this.onPressBack = () => {}
+
+    if(this.boxtext)
+      this.boxtext.setVisible(false);
+
+    for(var i = 0; i < this.textOptions.length; i ++){
+      if(this.textOptions[i])
+        this.textOptions[i].setVisible(false);
+    }
+
+    this.attacK_bar.setVisible(true);
+    this.needle.setVisible(true);
+
+    var alpha = (this.gameTime - this.attack_timer)
+
+    if(this.attack_executed){
+      alpha = this.needle_position;
+      this.needle.setTexture(this.needle_sprites[Math.floor((this.gameTime * 10) % 2)]);
+    }
+    else{
+      if(alpha > 1){
+        alpha = 1;
+        this.attack(alpha);
+      }
+    }
+
+    var posx = this.lerp(this.menuRect.x + 20, this.menuRect.x + this.menuRect.width - 20, alpha);
+    this.needle.x = posx;
+
+    var frame = Math.floor((this.gameTime - this.dmg_start_time) * 10);
+    
+    if(frame < 6) {
+      this.dmg_animation.setVisible(true);
+      this.dmg_animation.setTexture("atck_" + frame);
+    }
+    else{
+      this.dmg_animation.setVisible(false);
+    }
+
+    this.onPressSelect = () => {
+      if(!this.attack_executed){
+        this.attack(alpha);
+      }
+    }
+
+  }
+
+  attack(alpha: number){
+    this.needle_position = alpha;
+    this.dmg_start_time = this.gameTime;
+    this.attack_executed = true;
+    this.amogus_trust = false;
+
+    var map_alpha = 1 - Math.abs(2 * alpha - 1);
+    var dmg = Math.floor(this.lerp(5, 20, map_alpha));
+
+    setTimeout(() => {
+      this.cameraPosition.x = Math.random() * 80 - 40;
+      this.cameraPosition.y = Math.random() * 80 - 40;
+      this.amogus.shake = 1;
+      this.amogus.damage(dmg);
+
+      if(map_alpha > 0.7) this.punchstrong.play();
+      else this.punchweak.play();
+
+    }, 1000 * 0.6);
+
+    setTimeout(() => {
+      if(this.amogus.health > 0){
+        this.enterBattle();
+        this.amogus.openTextBubble("YOU ARE IMPOSTOR!!!!", 4);
+        this.attack_executed = false;
+      }
+
+    }, 1000 * 1.5);
+  }
+
+  lerp (value1, value2, amount) {
+      amount = Math.max(0, amount);
+      amount = Math.min(1, amount);
+      return (1 - amount) * value1 + amount * value2;
   }
 
 }

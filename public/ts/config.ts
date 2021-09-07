@@ -14,4 +14,7 @@ export default {
 		gravity: { y: 0 }
 		}
 	},
+	audio: {
+        disableWebAudio: true
+    }
 };
