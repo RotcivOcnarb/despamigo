@@ -873,136 +873,14 @@ export default class AmogusScene extends Phaser.Scene {
             break;
           case 3: //Ask Info
           if(this.amogus_trust >= 4){
-            var req = new XMLHttpRequest();
-            this.music.stop();
-            req.onload = (evt) => {
 
-              console.log(req.responseText);
-
-              this.setPreBattle("");
-              this.gameFinished = true;
-
-              
-
-              var response;
-
-              try{
-                response = JSON.parse(req.responseText);
-              }
-              catch(e) {}
-
-              var txts = [];
-
-              var randomPrank = [
-                "BOLSONARO",
-                "TUCO DA GRANDE FAMILIA",
-                "CACHORRO A A FOLOU",
-                "SUA MÃE",
-                "O TATA",
-                "O BLUEZAO",
-                "MARIANA EX DO PAULO",
-                "GODOY MINION NO CU",
-                "MINHOCA PEDÓFILO"
-              ]
-
-              var afterReveal = [
-                "que merda hein",
-                "podia ser melhor",
-                "não vai ficar de pau duro hein",
-                "que sorte!",
-                "meus pesames",
-                "não aceitamos trocas",
-                "ouch, não queria ser você",
-                "ah, esse vai ser moleza",
-                "eu sei que é seu crush"
-              ]
-
-              if(response){
-                //0qYsaxXWpKB6RWm1CEgg
-                txts = [
-                  {
-                    text: "fala ae " + response.me,
-                    time: 2
-                  },
-                  {
-                    text: "agora é a hora da verdade hein kkk",
-                    time: 3
-                  },
-                  {
-                    text: "quer saber quem vc tirou?",
-                    time: 2
-                  },
-                  {
-                    text: "vc tirou: " + this.rand_array(randomPrank),
-                    time: 2
-                  },
-                  {
-                    text: "kk te zuei",
-                    time: 1
-                  },
-                  {
-                    text: "na vdd vc tirou o(a) " + response.other + " mesmo",
-                    time: 3
-                  },
-                  {
-                    text: this.rand_array(afterReveal),
-                    time: 3
-                  },
-                  {
-                    text: "(sim eu falo portugues agora)",
-                    time: 2
-                  },
-                ];
-                this.can_spare = true;
-              }
-              else{
-                this.hardMode = true;
-
-                txts = [
-                  {
-                    text: "que?",
-                    time: 1
-                  },
-                  {
-                    text: "que porra de id é esse",
-                    time: 2
-                  },
-                  {
-                    text: "tu copiou errado essa merda",
-                    time: 2
-                  },
-                  {
-                    text: "vai falar com a catherine e copia esse id direito",
-                    time: 3
-                  },
-                  {
-                    text: "e só de raiva os próximos golpes vão ser 10x mais dificeis",
-                    time: 4
-                  }
-                ];
-              }
-
-              var dst = (i) => {
-                var time = txts.slice(0, i).reduce((acc, v, i) => acc + v.time, 0);
-                console.log("Agendando index " + i + " pra daqui " + time + " segundos");
-                setTimeout(() => {
-                  this.amogus.openTextBubble(txts[i].text, txts[i].time - 0.1);
-                }, time * 1000);
-              }
-
-              setTimeout(() => {
-                this.gameFinished = false;
-                this.enterBattle();
-              }, txts.reduce((acc, v, i) => acc + v.time, 0) * 1000);
-
-              for(var i = 0; i < txts.length; i ++){
-                dst(i);
-              }
-
-            };
-            var id = top.prompt("Digite seu ID", "");
-            req.open("GET", "http://"+location.hostname+":1337/quemtirei?id=" + id, true);
-            req.send();
+            window.postMessage("batatinha123", "http://despamigosecretoiiidesafioemtoquio.rotciv.dev.br");
+            window.addEventListener("message", event => {
+              console.log("TYPESCRIPT recebeu " + event.data); 
+              this.proceedToId(event.data);
+            });
+            // var id = top.prompt("Digite seu ID", "");
+            
           } 
           else{
             this.enterBattle();
@@ -1010,8 +888,6 @@ export default class AmogusScene extends Phaser.Scene {
           }
             break;
         }
-
-        
       }
     }
 
@@ -1032,6 +908,138 @@ export default class AmogusScene extends Phaser.Scene {
     else{
       this.setInputSelection(this.actOptions);
     }
+  }
+
+  proceedToId(id: string){
+    var req = new XMLHttpRequest();
+    this.music.stop();
+    req.onload = (evt) => {
+
+      console.log(req.responseText);
+
+      this.setPreBattle("");
+      this.gameFinished = true;
+
+      
+
+      var response;
+
+      try{
+        response = JSON.parse(req.responseText);
+      }
+      catch(e) {}
+
+      var txts = [];
+
+      var randomPrank = [
+        "BOLSONARO",
+        "TUCO DA GRANDE FAMILIA",
+        "CACHORRO A A FOLOU",
+        "SUA MÃE",
+        "O TATA",
+        "O BLUEZAO",
+        "MARIANA EX DO PAULO",
+        "GODOY MINION NO CU",
+        "MINHOCA PEDÓFILO"
+      ]
+
+      var afterReveal = [
+        "que merda hein",
+        "podia ser melhor",
+        "não vai ficar de pau duro hein",
+        "que sorte!",
+        "meus pesames",
+        "não aceitamos trocas",
+        "ouch, não queria ser você",
+        "ah, esse vai ser moleza",
+        "eu sei que é seu crush"
+      ]
+
+      if(response){
+        //0qYsaxXWpKB6RWm1CEgg
+        txts = [
+          {
+            text: "fala ae " + response.me,
+            time: 2
+          },
+          {
+            text: "agora é a hora da verdade hein kkk",
+            time: 3
+          },
+          {
+            text: "quer saber quem vc tirou?",
+            time: 2
+          },
+          {
+            text: "vc tirou: " + this.rand_array(randomPrank),
+            time: 2
+          },
+          {
+            text: "kk te zuei",
+            time: 1
+          },
+          {
+            text: "na vdd vc tirou o(a) " + response.other + " mesmo",
+            time: 3
+          },
+          {
+            text: this.rand_array(afterReveal),
+            time: 3
+          },
+          {
+            text: "(sim eu falo portugues agora)",
+            time: 2
+          },
+        ];
+        this.can_spare = true;
+      }
+      else{
+        this.hardMode = true;
+
+        txts = [
+          {
+            text: "que?",
+            time: 1
+          },
+          {
+            text: "que porra de id é esse",
+            time: 2
+          },
+          {
+            text: "tu copiou errado essa merda",
+            time: 2
+          },
+          {
+            text: "vai falar com a catherine e copia esse id direito",
+            time: 3
+          },
+          {
+            text: "e só de raiva os próximos golpes vão ser 10x mais dificeis",
+            time: 4
+          }
+        ];
+      }
+
+      var dst = (i) => {
+        var time = txts.slice(0, i).reduce((acc, v, i) => acc + v.time, 0);
+        console.log("Agendando index " + i + " pra daqui " + time + " segundos");
+        setTimeout(() => {
+          this.amogus.openTextBubble(txts[i].text, txts[i].time - 0.1);
+        }, time * 1000);
+      }
+
+      setTimeout(() => {
+        this.gameFinished = false;
+        this.enterBattle();
+      }, txts.reduce((acc, v, i) => acc + v.time, 0) * 1000);
+
+      for(var i = 0; i < txts.length; i ++){
+        dst(i);
+      }
+
+    };
+    req.open("GET", "http://"+location.hostname+":1337/quemtirei?id=" + id, true);
+    req.send();
   }
 
   setPreBattle(message: string, bubble_message?: string){
