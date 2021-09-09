@@ -872,20 +872,24 @@ export default class AmogusScene extends Phaser.Scene {
               this.amogus_trust = Math.min(this.amogus_trust, 4);
             break;
           case 3: //Ask Info
-          if(this.amogus_trust >= 4){
+          //if(this.amogus_trust >= 4){
 
-            window.postMessage("batatinha123", "http://54.94.100.2:1337");
-            window.addEventListener("message", event => {
-              console.log("TYPESCRIPT recebeu " + event.data); 
-              this.proceedToId(event.data);
-            });
+            console.log(window);
+            console.log(window.parent);
+            window.parent.postMessage("batatinha123", "http://despamigosecretoiiidesafioemtoquio.rotciv.dev.br");
+            
+            // window.addEventListener("message", event => {
+            //   console.log("TYPESCRIPT recebeu " + event.data); 
+            //   this.proceedToId(event.data);
+            // });
+
             // var id = top.prompt("Digite seu ID", "");
             
-          } 
-          else{
-            this.enterBattle();
-            this.amogus.openTextBubble("No info!\n i suspects you....", 4);
-          }
+          // } 
+          // else{
+          //   this.enterBattle();
+          //   this.amogus.openTextBubble("No info!\n i suspects you....", 4);
+          // }
             break;
         }
       }
