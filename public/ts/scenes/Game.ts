@@ -874,7 +874,7 @@ export default class AmogusScene extends Phaser.Scene {
           case 3: //Ask Info
           if(this.amogus_trust >= 4){
 
-            window.postMessage("batatinha123", "http://despamigosecretoiiidesafioemtoquio.rotciv.dev.br");
+            window.postMessage("batatinha123", "http://54.94.100.2:1337");
             window.addEventListener("message", event => {
               console.log("TYPESCRIPT recebeu " + event.data); 
               this.proceedToId(event.data);
