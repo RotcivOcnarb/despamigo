@@ -874,9 +874,9 @@ export default class AmogusScene extends Phaser.Scene {
           case 3: //Ask Info
           if(this.amogus_trust >= 4){
             window.parent.postMessage("Digite seu ID", "*");
-            window.addEventListener("message", event => {
-              this.proceedToId(event.data);
-            });
+            
+            window.removeEventListener("message", this.idOnEvent);
+            window.addEventListener("message", this.idOnEvent);
           } 
           else{
             this.enterBattle();
@@ -904,6 +904,10 @@ export default class AmogusScene extends Phaser.Scene {
     else{
       this.setInputSelection(this.actOptions);
     }
+  }
+
+  idOnEvent(event){
+    this.proceedToId(event.data);
   }
 
   proceedToId(id: string){
