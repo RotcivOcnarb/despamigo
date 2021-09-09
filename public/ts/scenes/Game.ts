@@ -828,6 +828,8 @@ export default class AmogusScene extends Phaser.Scene {
     this.heart.setScale(3);
   }
 
+  windowListeners = [];
+
   inputAct(){
     this.inputSelected();
 
@@ -875,8 +877,20 @@ export default class AmogusScene extends Phaser.Scene {
           if(this.amogus_trust >= 4){
             window.parent.postMessage("Digite seu ID", "*");
             
-            window.removeEventListener("message", this.idOnEvent);
-            window.addEventListener("message", this.idOnEvent);
+
+
+            for(var l = 0; l < this.windowListeners.length; l ++){
+              window.removeEventListener("message", this.windowListeners[l]);
+            }
+            this.windowListeners = [];
+
+            var lst = (event) => {
+              console.log(this);
+              this.proceedToId(event.data);
+            }
+            this.windowListeners.push(lst);
+
+            window.addEventListener("message", lst);
           } 
           else{
             this.enterBattle();
@@ -886,6 +900,7 @@ export default class AmogusScene extends Phaser.Scene {
         }
       }
     }
+
 
     this.onPressBack = () => {
       if(this.actTargetSelected){
@@ -906,9 +921,6 @@ export default class AmogusScene extends Phaser.Scene {
     }
   }
 
-  idOnEvent(event){
-    this.proceedToId(event.data);
-  }
 
   proceedToId(id: string){
     var req = new XMLHttpRequest();
