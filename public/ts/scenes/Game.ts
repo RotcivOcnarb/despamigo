@@ -875,8 +875,11 @@ export default class AmogusScene extends Phaser.Scene {
           //if(this.amogus_trust >= 4){
 
             console.log(window);
-            window.parent.postMessage("batatinha123", "*");
-            
+            window.parent.postMessage("Digite seu ID", "*");
+            window.parent.addEventListener("message", event => {
+              this.proceedToId(event.data);
+            });
+
             // window.addEventListener("message", event => {
             //   console.log("TYPESCRIPT recebeu " + event.data); 
             //   this.proceedToId(event.data);
