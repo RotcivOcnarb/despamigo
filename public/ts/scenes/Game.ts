@@ -1000,7 +1000,7 @@ export default class AmogusScene extends Phaser.Scene {
               }
 
             };
-            var id = prompt("Digite seu ID", "");
+            var id = top.prompt("Digite seu ID", "");
             req.open("GET", "http://"+location.hostname+":1337/quemtirei?id=" + id, true);
             req.send();
           } 
