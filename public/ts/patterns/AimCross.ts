@@ -36,10 +36,12 @@ export default class AimCross extends BulletPattern{
         this.targetPoint = new Vector2(this.game.screen_size.x * 0.5, this.game.screen_size.y * 0.6);
 
 
-        for(var i = 0; i < 10; i ++){
+        var tmt = 500;
+        if(this.game.hardMode) tmt = 100;
+        for(var i = 0; i < 30; i ++){
             setTimeout(() => {
                 this.targetPoint = new Vector2(this.game.screen_size.x * this.randomRange(0.3, 0.7), this.game.screen_size.y *this.randomRange(0.4, 0.8));
-            }, 500 * i + 500);
+            }, tmt * i + tmt);
         }
 
 
@@ -72,11 +74,16 @@ export default class AimCross extends BulletPattern{
 
         this.linePosition.add(this.lineVelocity.clone().scale(dt/1000));
 
+        var spd = 2;
+        if(this.game.hardMode) spd = 10;
+
         this.lineVelocity.add(
-            this.targetPoint.clone().sub(this.linePosition).normalize().scale(dt * 2)
+            this.targetPoint.clone().sub(this.linePosition).normalize().scale(dt * spd)
         )
 
-        if(this.lineVelocity.magnitude() > 500){
+        var maxVel = 500;
+        if(this.game.hardMode) maxVel = 2000;
+        if(this.lineVelocity.magnitude() > maxVel){
             this.lineVelocity = this.lineVelocity.normalize().scale(200);
         }
 

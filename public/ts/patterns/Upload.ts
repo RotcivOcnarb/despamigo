@@ -65,7 +65,11 @@ export default class Upload extends BulletPattern{
             this.uploadText.destroy();
         }, 6000);
 
-        for(var i = 0; i < 10; i ++){
+        var c = 10;
+        if(this.game.hardMode) c = 50;
+
+        for(var i = 0; i < c; i ++){
+            var step = (6000/2 / c);
             setTimeout(() => {
                 var sp = this.game.add.sprite(this.game.screen_size.x * 0.2, this.game.screen_size.y * 0.6, "");
                 sp.play("among_anim");
@@ -77,19 +81,19 @@ export default class Upload extends BulletPattern{
                     progress: 0
                 });
                 send.setTexture("fd_send_open");
-            }, 300 * i + 500);
+            }, step * i + 500);
 
             setTimeout(() => {
                 send.setTexture("fd_send_closed");
-            }, 300 * i + 650);
+            }, step * i + 650);
 
             setTimeout(() => {
                 receive.setTexture("fd_receive_open");
-            }, 300 * i + 2500);
+            }, step * i + 2500);
 
             setTimeout(() => {
                 receive.setTexture("fd_receive_closed");
-            }, 300 * i + 2650);
+            }, step * i + 2650);
 
         }
     }

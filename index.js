@@ -4,6 +4,7 @@ const express = require("express");
 const path = require( "path");
 const crypto = require( "crypto");
 const dropbox = require( "./dropbox_api.js");
+const cors = require("cors");
 
 const app = express();
 
@@ -12,6 +13,7 @@ let idList = [];
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(__dirname + '/public'));
+app.use(cors())
 
 decrypt((ids) => { 
 	idList = ids;
@@ -81,31 +83,6 @@ function decrypt(callback){
 			callback(JSON.parse(decryptedData));
 		});
 	})
-
-	// fs.open(key, 'r', function(status, fd) {
-		// if (status) {
-			// console.log(status.message);
-			// return;
-		// }
-		// var buffer = Buffer.alloc(16+32);
-		// fs.read(fd, buffer, 0, 16+32, 0, function(err, num) {
-			// buffer.copy(initVector, 0, 0, 16);
-			// buffer.copy(Securitykey, 0, 16, 16+32);
-
-			// fs.readFile(file, 'utf8' , (err, data) => {
-				// if (err) {
-					// console.error(err);
-					// return;
-				// }
-				// const decipher = crypto.createDecipheriv(algorithm, Securitykey, initVector);
-				// let decryptedData = decipher.update(data, "hex", "utf-8");
-				// decryptedData += decipher.final("utf8");
-				
-				// callback(JSON.parse(decryptedData));
-			
-			// })
-		// });
-	// });
 }
 
 app.listen(1337, () => {

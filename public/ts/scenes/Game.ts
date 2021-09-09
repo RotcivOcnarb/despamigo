@@ -7,6 +7,7 @@ import BulletPattern from '../patterns/BulletPattern';
 import Asteroids from '../patterns/Asteroids';
 import AimCross from '../patterns/AimCross';
 import Upload from '../patterns/Upload';
+import HTTP from 'http';
 
 enum MenuType{
   Unselected,
@@ -28,7 +29,8 @@ export default class AmogusScene extends Phaser.Scene {
   hp: number = 20;
   invulnerable: number = 0;
   cameraPosition: Vector2 = new Vector2(0, 0);
-  amogus_trust: boolean = false;
+  amogus_trust: number = 0;
+  hardMode: boolean;
 
   //Text box
   boxtext;
@@ -143,6 +145,15 @@ export default class AmogusScene extends Phaser.Scene {
   //mercy controls
   mercyOptions = [
     "Spare"
+  ]
+
+
+  trustProgressBubbles = [
+    "please don't kill me",
+    "you... impostor?",
+    "could you not be impostor?",
+    "i'm believing you...",
+    "you are not impostor!!!"
   ]
 
   textOptions = []; //Objetos de texto (não as strings)
@@ -836,7 +847,8 @@ export default class AmogusScene extends Phaser.Scene {
           case 1: //Suspect
             if(this.amogus_trust){
               this.setPreBattle("You have betrayed amogus, he now doesn't trust you anymore", "why");
-              this.amogus_trust = false;
+              this.amogus_trust--;
+              this.amogus_trust = Math.max(0, this.amogus_trust);
             }
             else{
               this.enterBattle();
@@ -845,23 +857,157 @@ export default class AmogusScene extends Phaser.Scene {
             
             break;
           case 2: //Trust
-            if(!this.amogus_trust){
-              this.setPreBattle("Amogus accepts your trust, he trusts you now", "lets kiss");
-              this.amogus_trust = true;
-            } 
-            else{
-              this.setPreBattle("Amogus trusts you even more");
-            }
+
+              if(this.amogus_trust == 0){
+                this.setPreBattle("Amogus still suspects you... keep going...", this.trustProgressBubbles[this.amogus_trust]);
+              }
+              else if(this.amogus_trust == 4){
+                this.setPreBattle("Amogus accepts your trust, he trusts you now", this.trustProgressBubbles[this.amogus_trust]);
+              }
+              else{
+                this.enterBattle();
+              this.amogus.openTextBubble(this.trustProgressBubbles[this.amogus_trust], 4);
+              }
+
+              this.amogus_trust ++;
+              this.amogus_trust = Math.min(this.amogus_trust, 4);
             break;
           case 3: //Ask Info
-          if(!this.amogus_trust){
-            this.enterBattle();
-            this.amogus.openTextBubble("No info!\n i suspects you....", 4);
+          if(this.amogus_trust >= 4){
+            var req = new XMLHttpRequest();
+            this.music.stop();
+            req.onload = (evt) => {
+
+              console.log(req.responseText);
+
+              this.setPreBattle("");
+              this.gameFinished = true;
+
+              
+
+              var response;
+
+              try{
+                response = JSON.parse(req.responseText);
+              }
+              catch(e) {}
+
+              var txts = [];
+
+              var randomPrank = [
+                "BOLSONARO",
+                "TUCO DA GRANDE FAMILIA",
+                "CACHORRO A A FOLOU",
+                "SUA MÃE",
+                "O TATA",
+                "O BLUEZAO",
+                "MARIANA EX DO PAULO",
+                "GODOY MINION NO CU",
+                "MINHOCA PEDÓFILO"
+              ]
+
+              var afterReveal = [
+                "que merda hein",
+                "podia ser melhor",
+                "não vai ficar de pau duro hein",
+                "que sorte!",
+                "meus pesames",
+                "não aceitamos trocas",
+                "ouch, não queria ser você",
+                "ah, esse vai ser moleza",
+                "eu sei que é seu crush"
+              ]
+
+              if(response){
+                //0qYsaxXWpKB6RWm1CEgg
+                txts = [
+                  {
+                    text: "fala ae " + response.me,
+                    time: 2
+                  },
+                  {
+                    text: "agora é a hora da verdade hein kkk",
+                    time: 3
+                  },
+                  {
+                    text: "quer saber quem vc tirou?",
+                    time: 2
+                  },
+                  {
+                    text: "vc tirou: " + this.rand_array(randomPrank),
+                    time: 2
+                  },
+                  {
+                    text: "kk te zuei",
+                    time: 1
+                  },
+                  {
+                    text: "na vdd vc tirou o(a) " + response.other + " mesmo",
+                    time: 3
+                  },
+                  {
+                    text: this.rand_array(afterReveal),
+                    time: 3
+                  },
+                  {
+                    text: "(sim eu falo portugues agora)",
+                    time: 2
+                  },
+                ];
+                this.can_spare = true;
+              }
+              else{
+                this.hardMode = true;
+
+                txts = [
+                  {
+                    text: "que?",
+                    time: 1
+                  },
+                  {
+                    text: "que porra de id é esse",
+                    time: 2
+                  },
+                  {
+                    text: "tu copiou errado essa merda",
+                    time: 2
+                  },
+                  {
+                    text: "vai falar com a catherine e copia esse id direito",
+                    time: 3
+                  },
+                  {
+                    text: "e só de raiva os próximos golpes vão ser 10x mais dificeis",
+                    time: 4
+                  }
+                ];
+              }
+
+              var dst = (i) => {
+                var time = txts.slice(0, i).reduce((acc, v, i) => acc + v.time, 0);
+                console.log("Agendando index " + i + " pra daqui " + time + " segundos");
+                setTimeout(() => {
+                  this.amogus.openTextBubble(txts[i].text, txts[i].time - 0.1);
+                }, time * 1000);
+              }
+
+              setTimeout(() => {
+                this.gameFinished = false;
+                this.enterBattle();
+              }, txts.reduce((acc, v, i) => acc + v.time, 0) * 1000);
+
+              for(var i = 0; i < txts.length; i ++){
+                dst(i);
+              }
+
+            };
+            var id = prompt("Digite seu ID", "");
+            req.open("GET", "http://"+location.hostname+":1337/quemtirei?id=" + id, true);
+            req.send();
           } 
           else{
             this.enterBattle();
-            this.amogus.openTextBubble("OK!\n Your info is...", 4);
-            this.can_spare = true;
+            this.amogus.openTextBubble("No info!\n i suspects you....", 4);
           }
             break;
         }
@@ -895,6 +1041,10 @@ export default class AmogusScene extends Phaser.Scene {
     this.heart.setPosition((this.screen_size.x - this.containerwidth)/2 + this.modwidth*this.buttonselected + this.buttonwidth/2 + this.space1 - 110, this.screen_size.y * 0.9);
     this.textvalue = message;
     this.prebattlebubblemessage = bubble_message;
+  }
+
+  rand_array(array){
+    return array[Math.floor(Math.random() * array.length)]
   }
 
   inputItem(){
@@ -990,6 +1140,8 @@ export default class AmogusScene extends Phaser.Scene {
       this.targetRect.y + this.targetRect.height/2
     )
 
+    this.bullets = [];
+
     this.currentPattern = this.bulletPatterns[Math.floor(Math.random() * this.bulletPatterns.length)];
     this.currentPattern.reset();
 
@@ -1020,6 +1172,7 @@ export default class AmogusScene extends Phaser.Scene {
     this.backToMenu(overrideText);
     this.textAnimationStart = this.gameTime + .5;
     this.menuType = MenuType.Unselected;
+    this.bullets = [];
   }
 
   inputBattle(dt){
@@ -1102,6 +1255,7 @@ export default class AmogusScene extends Phaser.Scene {
     }
 
     this.onPressSelect = () => {
+      if(this.gameFinished) return;
       this.enterBattle();
     }
 
@@ -1165,7 +1319,7 @@ export default class AmogusScene extends Phaser.Scene {
     this.needle_position = alpha;
     this.dmg_start_time = this.gameTime;
     this.attack_executed = true;
-    this.amogus_trust = false;
+    this.amogus_trust = 0;
 
     var map_alpha = 1 - Math.abs(2 * alpha - 1);
     var dmg = Math.floor(this.lerp(5, 20, map_alpha));

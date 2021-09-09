@@ -36,7 +36,11 @@ export default class Asteroids extends BulletPattern{
 
         this.asteroids = [];
 
-        for(var i = 0; i < 7; i ++){
+        var c = 7;
+
+        if(this.game.hardMode) c = 30;
+
+        for(var i = 0; i < c; i ++){
 
             var randomCircle = new Vector2(
                 this.randomRange(-1, 1),
@@ -53,11 +57,14 @@ export default class Asteroids extends BulletPattern{
 
             var direction = origin.clone().sub(position).normalize().rotate(this.randomRange(-0.5, 0.5));
 
+            var accScale = 100;
+            if(this.game.hardMode) accScale = 700;
+
             this.asteroids.push({
                 image: img,
                 position: position,
                 velocity: new Vector2(0, 0),
-                acceleration: direction.clone().scale(100),
+                acceleration: direction.clone().scale(accScale),
                 start: this.game.gameTime + this.randomRange(0, 1)
             });
 

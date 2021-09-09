@@ -23,8 +23,8 @@ export default class Amogus {
     text_start: number = 0;
     bubble_string: string = "Faaala meme";
     shake: number = 0;
-    health: number = 100;
-    tweened_health: number = 100;
+    health: number = 300;
+    tweened_health: number = 300;
     wave_pattern: number = 1;
 
     graphics: Phaser.GameObjects.Graphics;
@@ -194,7 +194,7 @@ export default class Amogus {
         this.graphics.fillRect(this.game.screen_size.x/2 - 150, this.game.screen_size.y * 0.3, 300, 20);
 
         this.graphics.fillStyle(0x00d800, 1);
-        this.graphics.fillRect(this.game.screen_size.x/2 - 150, this.game.screen_size.y * 0.3, 300 * (this.tweened_health/100), 20);
+        this.graphics.fillRect(this.game.screen_size.x/2 - 150, this.game.screen_size.y * 0.3, 300 * (this.tweened_health/300), 20);
 
         this.graphics.lineStyle(3, 0x000000, 1);
         this.graphics.strokeRect(this.game.screen_size.x/2 - 150, this.game.screen_size.y * 0.3, 300, 20);

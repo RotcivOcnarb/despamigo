@@ -60,12 +60,22 @@ export default class Alavanca extends BulletPattern {
             "folha3"
         ]
 
-        for(var i = 0; i < 5; i ++){
+        var c = 5;
+        if(this.game.hardMode) c = 50;
+
+        for(var i = 0; i < c; i ++){
 
             var position = new Vector2(
                 this.randomRange(this.game.screen_size.x * 0.4, this.game.screen_size.x * 0.6),
                 this.randomRange(this.game.screen_size.y * 0.1, this.game.screen_size.y * 0.3)
             );
+
+            if(this.game.hardMode){
+                position = new Vector2(
+                    this.randomRange(this.game.screen_size.x * 0.3, this.game.screen_size.x * 0.7),
+                    this.randomRange(this.game.screen_size.y * - 0.3, this.game.screen_size.y * 0.3)
+                );
+            }
 
             var folha = this.game.physics.add.image(position.x, position.y, f[Math.floor(Math.random() * f.length)]);
 
