@@ -876,7 +876,7 @@ export default class AmogusScene extends Phaser.Scene {
 
             console.log(window);
             window.parent.postMessage("Digite seu ID", "*");
-            window.parent.addEventListener("message", event => {
+            window.addEventListener("message", event => {
               this.proceedToId(event.data);
             });
 
