@@ -7,7 +7,6 @@ import BulletPattern from '../patterns/BulletPattern';
 import Asteroids from '../patterns/Asteroids';
 import AimCross from '../patterns/AimCross';
 import Upload from '../patterns/Upload';
-import HTTP from 'http';
 
 enum MenuType{
   Unselected,
