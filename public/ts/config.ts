@@ -2,8 +2,7 @@ import Phaser from 'phaser';
 
 export default {
   type: Phaser.AUTO,
-	width: window.innerWidth,
-	height: window.innerHeight,
+
 	pixelArt: true,
 	parent: 'game',
 	physics: {
@@ -16,5 +15,11 @@ export default {
 	},
 	audio: {
         disableWebAudio: true
-    }
+    },
+	scale: {
+		mode: Phaser.Scale.FIT,
+		autoCenter: Phaser.Scale.CENTER_BOTH,
+		width: 1879,
+		height: 939,
+	}
 };

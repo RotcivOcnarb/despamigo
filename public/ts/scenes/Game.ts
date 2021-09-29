@@ -30,6 +30,7 @@ export default class AmogusScene extends Phaser.Scene {
   cameraPosition: Vector2 = new Vector2(0, 0);
   amogus_trust: number = 0;
   hardMode: boolean;
+  gameScale: number = 1;
 
   //Text box
   boxtext;
@@ -199,8 +200,8 @@ export default class AmogusScene extends Phaser.Scene {
     super('GameScene');
 
     this.screen_size = new Vector2(
-      window.innerWidth,
-      window.innerHeight
+      1879,
+      939
     )
 
     this.origin = new Vector2(
@@ -327,10 +328,10 @@ export default class AmogusScene extends Phaser.Scene {
   create() {
 
     var l1 = this.add.image(this.screen_size.x*0.2, this.origin.y + 50, 'greenlines');
-    l1.setScale(3);
+    l1.setScale(3 * this.gameScale);
     
     var l2 = this.add.image(this.screen_size.x*0.8, this.origin.y + 50, 'greenlines');
-    l2.setScale(-3, 3);
+    l2.setScale(-3 * this.gameScale, 3 * this.gameScale);
 
     this.amogus.create();
 
@@ -423,25 +424,25 @@ export default class AmogusScene extends Phaser.Scene {
       var nm = this.buttonimagenames[i];
       
       this.buttons[nm] = this.add.image((this.screen_size.x - this.containerwidth)/2 + this.modwidth*i + this.buttonwidth/2 + this.space1, this.screen_size.y * 0.9, nm + '_idle');
-      this.buttons[nm].setScale(3);
+      this.buttons[nm].setScale(3 * this.gameScale);
     }
 
     this.heart = this.add.image((this.screen_size.x - this.containerwidth)/2 + this.modwidth*0 + this.buttonwidth/2 + this.space1 - 100, this.screen_size.y * 0.9, 'heart');
-	  this.heart.setScale(3 * 1.2);
+	  this.heart.setScale(3 * 1.2  * this.gameScale);
     
     for(var i = 0; i < this.bulletPatterns.length; i ++){
       this.bulletPatterns[i].create();
     }
 
     this.attacK_bar = this.add.image(this.textRect.x + this.textRect.width/2, this.textRect.y + this.textRect.height/2, "attack_bar");
-    this.attacK_bar.setScale(2);
+    this.attacK_bar.setScale(2 * this.gameScale);
     this.attacK_bar.setVisible(false);
 
     this.needle = this.add.image(this.menuRect.x + 20, this.menuRect.y + this.menuRect.height/2, "needle_default");
-    this.needle.setScale(1.8);
+    this.needle.setScale(1.8 * this.gameScale);
 
     this.dmg_animation = this.add.image(this.screen_size.x/2, this.screen_size.y * 0.2, "atck_0");
-    this.dmg_animation.setScale(3);
+    this.dmg_animation.setScale(3 * this.gameScale);
 
     this.createAudios();
 
@@ -877,6 +878,7 @@ export default class AmogusScene extends Phaser.Scene {
           if(this.amogus_trust >= 4){
             window.parent.postMessage("Digite seu ID", "*");
             
+        //0qYsaxXWpKB6RWm1CEgg
 
 
             for(var l = 0; l < this.windowListeners.length; l ++){
